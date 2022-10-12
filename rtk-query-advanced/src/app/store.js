@@ -10,5 +10,5 @@ export const store = configureStore({
     },
     // this middleware from apiSlice (apiSlice.middleware) manages cache lifetimes and expirations
     middleware: getDefaultMiddleware => 
-            getDefaultMiddleware().concat(apiSlice.middleware)
+        getDefaultMiddleware().concat(apiSlice.middleware)
 })

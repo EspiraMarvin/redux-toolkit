@@ -10,7 +10,7 @@ const initialState =  {
     error: null
 }
 
-export const fetchPosts = createAsyncThunk('posts.fetchPosts', async () => {
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     try {
         const response = await axios.get(POSTS_URL)
         return response.data.slice(0, 9)
@@ -87,12 +87,11 @@ const postsSlice = createSlice({
             }
         }
     },
-    extraReducers(builder) {
-        builder
-            .addCase(fetchPosts.pending, (state, action) => {
-                state.status = 'loading'
-            })
-            .addCase(fetchPosts.fulfilled, (state, action) => {
+    extraReducers: {
+        [fetchPosts.pending]: (state, action) => {
+            state.status = 'loading'
+        },
+        [fetchPosts.fulfilled]: (state, action) => {
                 state.status = 'succeeded'
                 // adding date and reactions
                 let min = 1;
@@ -109,25 +108,25 @@ const postsSlice = createSlice({
          })
                 // add any fetched post to the array
                 state.posts = state.posts.concat(loadedPosts)
-            })
-            .addCase(fetchPosts.rejected, (state, action) => {
-                state.status = 'failed'
-                state.error = action.error.message
-            })
-            .addCase(addNewPost.fulfilled, (state, action) => {
+        },
+        [fetchPosts.rejected]: (state, action) => {
+            state.status = 'rejected'
+            state.error = action.error.message
+        },
+        [addNewPost.fulfilled]: (state, action) => {
                 action.payload.userId = Number(action.payload.userId)
                 action.payload.date = new Date().toISOString()
                 action.payload.reactions = {
                     thumbsUp: 0,
-                    wow: 0,
+              //             wow: 0,
                     heart: 0,
                     rocket: 0,
                     coffee: 0
                 }
                 // console.log(action.payload)
                 state.posts.push(action.payload)
-            })
-            .addCase(updatePost.fulfilled, (state, action) => {
+        },
+        [updatePost.fulfilled]: (state, action) => {
                 if (!action.payload?.id) {
                     console.log('Update could not complete')
                     console.log(action.payload)
@@ -137,8 +136,8 @@ const postsSlice = createSlice({
                 action.payload.date = new Date().toISOString();
                 const posts = state.posts.filter(post => post.id !== id);
                 state.posts = [...posts, action.payload];
-            })
-            .addCase(deletePost.fulfilled, (state, action) => {
+        },
+        [deletePost.fulfilled]: (state, action) => {
                 if (!action.payload?.id) {
                     console.log('Delete could not complete')
                     console.log(action.payload)
@@ -147,7 +146,68 @@ const postsSlice = createSlice({
                 const { id } = action.payload;
                 const posts = state.posts.filter(post => post.id !== id);
                 state.posts = posts;
-            })
+        },
+
+        // builder
+        //     .addCase(fetchPosts.pending, (state, action) => {
+                // state.status = 'loading'
+        //     })
+        //     .addCase(fetchPosts.fulfilled, (state, action) => {
+        //         state.status = 'succeeded'
+        //         // adding date and reactions
+        //         let min = 1;
+        //         const loadedPosts = action.payload.map(post => {
+        //             post.date = sub(new Date(), { minutes: min++ }).toISOString();
+        //             post.reactions = {
+        //                 thumbsUp: 0,
+        //                 wow: 0,
+        //                 heart: 0,
+        //                 rocket: 0,
+        //                 coffee: 0
+        //             }
+        //             return post
+        //  })
+        //         // add any fetched post to the array
+        //         state.posts = state.posts.concat(loadedPosts)
+        //     })
+        //     .addCase(fetchPosts.rejected, (state, action) => {
+        //         state.status = 'failed'
+        //         state.error = action.error.message
+        //     })
+            // .addCase(addNewPost.fulfilled, (state, action) => {
+            //     action.payload.userId = Number(action.payload.userId)
+            //     action.payload.date = new Date().toISOString()
+            //     action.payload.reactions = {
+            //         thumbsUp: 0,
+            //   //             wow: 0,
+            //         heart: 0,
+            //         rocket: 0,
+            //         coffee: 0
+            //     }
+            //     // console.log(action.payload)
+            //     state.posts.push(action.payload)
+            // })
+            // .addCase(updatePost.fulfilled, (state, action) => {
+            //     if (!action.payload?.id) {
+            //         console.log('Update could not complete')
+            //         console.log(action.payload)
+            //         return;
+            //     }
+            //     const { id } = action.payload;
+            //     action.payload.date = new Date().toISOString();
+            //     const posts = state.posts.filter(post => post.id !== id);
+            //     state.posts = [...posts, action.payload];
+            // })
+            // .addCase(deletePost.fulfilled, (state, action) => {
+            //     if (!action.payload?.id) {
+            //         console.log('Delete could not complete')
+            //         console.log(action.payload)
+            //         return;
+            //     }
+            //     const { id } = action.payload;
+            //     const posts = state.posts.filter(post => post.id !== id);
+            //     state.posts = posts;
+            // })
     }
 })
 
